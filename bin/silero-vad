@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../lib/silero_vad"
+
+if ARGV.empty?
+  puts "Usage: silero-vad <audio.wav> [--seconds] [--threshold 0.5]"
+  exit 1
+end
+
+file = ARGV[0]
+return_seconds = ARGV.include?("--seconds")
+threshold_idx = ARGV.index("--threshold")
+threshold = threshold_idx ? ARGV[threshold_idx + 1].to_f : 0.5
+
+unless File.exist?(file)
+  $stderr.puts "File not found: #{file}"
+  exit 1
+end
+
+segments = SileroVad.detect(file, return_seconds: return_seconds, threshold: threshold)
+segments.each do |s|
+  unit = return_seconds ? "s" : " samples"
+  puts "#{s[:start]}#{unit} - #{s[:end]}#{unit}"
+end
